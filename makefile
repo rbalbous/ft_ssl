@@ -7,7 +7,8 @@ INCLUDES = includes
 
 OBJ_PATH = obj
 
-SRCS = main.c
+SRCS =	main.c \
+		parser.c
 SRCS_PATH = srcs/ft_ssl
 SRCS_OBJ = $(addprefix $(OBJ_PATH)/, $(SRCS:.c=.o))
 

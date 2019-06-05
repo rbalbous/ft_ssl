@@ -6,41 +6,49 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/06/05 00:16:50 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/06/06 00:16:34 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
 
-t_file_queue	get_flags_args(t_args *args, int argc, char **argv,int i)
+void			disp_usage()
 {
-	(void)args;
-	(void)argc;
-	(void)argv;
-	(void)i;
+	ft_printf("erreur\n");
 }
 
-int				check_enum(char *str)
+void		get_flags_args(t_args *args, char *str)
+{
+	(void)args;
+	(void)str;
+}
+
+int				check_mdarg(char *str)
 {	
-	static char	**str_md = {md5, sha256};
+	static char *str_md[2] = {"md5", "sha256"};
 	int		i;
 
 	i = 0;
+	ft_printf("%s\n", str);
 	while (str_md[i])
 	{
-		if (ft_strcmp(str_md[i], str) == 0);
+		if (ft_strcmp(str_md[i], str) == 0)
+		{
+			ft_printf("%d\n", i);
 			return (i);
+		}
 		i++;
 	}
 	return (-1);
 }
 
-t_file_queue	get_new_stdin(int md, t_args *args, t_file_queue (*f[2])(), t_file_queue first)
+void		*get_new_stdin(t_args *args)
 {
 	char		*str;
 	char		*tmp;
 	int			i;
 
+	tmp = NULL;
 	ft_printf("ft_ssl> ");
 	while (1)
 	{
@@ -49,40 +57,66 @@ t_file_queue	get_new_stdin(int md, t_args *args, t_file_queue (*f[2])(), t_file_
 		i = 0;
 		while (str[i] && (str[i] != ' ' || str[i] != '	'))
 			i++;
-		if (str[i])
+		tmp = ft_memacpy(str, i);
+		if ((args->md = check_mdarg(tmp)) > -1)
 		{
-			memcpy(tmp, str, i);
-			if ((md = check_enum(tmp)) > -1)
-			{
-				first = get_flags_args(args, 1, &str, 0);	
-				return (first);
-			}
+			get_flags_args(args, str);
 		}
-		disp_usage();
+		else
+		{
+			disp_usage();
+			ft_printf("ft_ssl> ");
+		}
 		free(str);
 	}
 }
 
-t_file_queue	parser(int argc, char **argv, t_args *args)
+char		*split_args(int ac,char **av)
 {
 	int		i;
-	static t_file_queue (*f[2])() = {md5, sha256};
-	t_file_queue first;
-	int		md;
+	char 	*str;
+	int		count;
+	int		j;
 
-	i = 1;
-	md = -1;
-	while (argc > i)
+	i = 2;
+	count = 0;
+	j = 0;
+	str = NULL;
+	while (i < ac)
 	{
-		if ((md = check_enum(argv[i])) > -1)
+		j = 0;
+		while (av[i][j])
 		{
-			first = get_flags_args(args, argc, argv, i);		
-			return (first);
+			count++;
+			j++;
 		}
-		else
-			disp_usage();
+		count++;
 		i++;
 	}
-	first = get_new_stdin(md, args, f, first);
-	return (first);
+	count--;
+	str = ft_memacpy(av[2], count);
+	i = 0;
+	while (i < count)
+	{
+		if (str[i] == 0)
+		{
+			str[i] = ' ';
+		}
+		i++;
+	}
+	return (str);
+}
+
+void		parser(int argc, char **argv, t_args *args)
+{
+	char *str;
+
+	if ((args->md = check_mdarg(argv[1])) > -1)
+	{
+		str = split_args(argc, argv);
+		get_flags_args(args, str);	
+	}
+	else
+		disp_usage();
+	get_new_stdin(args);
 }
