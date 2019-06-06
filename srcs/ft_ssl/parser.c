@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/06/06 00:16:34 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/06/07 01:37:25 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,25 @@ void			disp_usage()
 	ft_printf("erreur\n");
 }
 
-void		get_flags_args(t_args *args, char *str)
+void		get_flags_args(t_args *args, char *str, char **str_md)
 {
-	(void)args;
+	int		i;
+
 	(void)str;
+	i = ft_strlen(str_md[(int)args->md]);
+	while (str[i])
+	{
+		while (str[i] != ' ')
+		{
+			
+		}
+		i++;
+	}
 }
 
-int				check_mdarg(char *str)
-{	
-	static char *str_md[2] = {"md5", "sha256"};
-	int		i;
+int				check_mdarg(char *str, char **str_md)
+{
+	int			i;
 
 	i = 0;
 	ft_printf("%s\n", str);
@@ -42,7 +51,7 @@ int				check_mdarg(char *str)
 	return (-1);
 }
 
-void		*get_new_stdin(t_args *args)
+void		*get_new_stdin(t_args *args, char **str_md)
 {
 	char		*str;
 	char		*tmp;
@@ -58,9 +67,9 @@ void		*get_new_stdin(t_args *args)
 		while (str[i] && (str[i] != ' ' || str[i] != '	'))
 			i++;
 		tmp = ft_memacpy(str, i);
-		if ((args->md = check_mdarg(tmp)) > -1)
+		if ((args->md = check_mdarg(tmp, str_md)) > -1)
 		{
-			get_flags_args(args, str);
+			get_flags_args(args, str, str_md);
 		}
 		else
 		{
@@ -110,13 +119,14 @@ char		*split_args(int ac,char **av)
 void		parser(int argc, char **argv, t_args *args)
 {
 	char *str;
+	static char *str_md[2] = {"md5", "sha256"};
 
-	if ((args->md = check_mdarg(argv[1])) > -1)
+	if ((args->md = check_mdarg(argv[1], str_md)) > -1)
 	{
 		str = split_args(argc, argv);
-		get_flags_args(args, str);	
+		get_flags_args(args, str, str_md);	
 	}
 	else
 		disp_usage();
-	get_new_stdin(args);
+	get_new_stdin(args, str_md);
 }
