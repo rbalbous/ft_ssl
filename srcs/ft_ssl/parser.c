@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/06/07 01:37:25 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/06/09 20:25:00 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,40 @@ void			disp_usage()
 void		get_flags_args(t_args *args, char *str, char **str_md)
 {
 	int		i;
+	int		count;
 
-	(void)str;
 	i = ft_strlen(str_md[(int)args->md]);
 	while (str[i])
 	{
+		count = 0;
 		while (str[i] != ' ')
 		{
-			
+			if (str[i] == '-' && count == 0)
+			{
+				i++;
+				if (str[i] == '-')
+				{
+					args->arg_nf = 1;
+					i++;
+				}
+				else
+				{
+					while (str[i] && str[i] != ' ')
+					{
+						if (str[i] == 'p')
+							get_prompt(str, i, args);
+						else if (str[i] == 'q')
+							args->arg_q = 1;
+						else if (str[i] == 's')
+							args->arg_s = 1;
+						else if (str[i] == 'r')
+							args->arg_r = 1;
+						else
+							disp_usage_exit();
+						i++;
+					}
+				}
+			}
 		}
 		i++;
 	}

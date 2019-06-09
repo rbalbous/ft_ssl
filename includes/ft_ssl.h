@@ -14,6 +14,7 @@ struct		s_args
 	t_uint8 arg_p: 1;
 	t_uint8 arg_s: 1;
 	t_uint8 arg_r: 1;
+	t_uint8 arg_nf: 1;
 	t_int8 md;
 };
 
