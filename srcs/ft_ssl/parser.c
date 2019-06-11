@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/06/09 20:25:00 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/06/11 01:55:10 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,46 +17,142 @@ void			disp_usage()
 	ft_printf("erreur\n");
 }
 
-void		get_flags_args(t_args *args, char *str, char **str_md)
+void			disp_usage_exit()
 {
-	int		i;
-	int		count;
+	exit(ft_dprintf(2, "usage: [md5;sha256] [-pqr] [-s string] [files ...]\n"));
+}
 
-	i = ft_strlen(str_md[(int)args->md]);
-	while (str[i])
+void			disp_usage_ssl_exit(char *str)
+{
+	exit(ft_dprintf(2, "ft_ssl: Error: '%s' is an invalid command.\n\n", str) +
+	ft_dprintf(2, "Standard commands\n\nMessage Digest commands\nmd5\nsha256") +
+	ft_dprintf(2, "\n\nCipher commands\n\n"));
+}
+
+void			disp_usage_ssl(char *str)
+{
+	ft_dprintf(2, "ft_ssl: Error: '%s' is an invalid command.\n\n", str);
+	ft_dprintf(2, "Standard commands\n\nMessage Digest commands\nmd5\nsha256");
+	ft_dprintf(2, "\n\nCipher commands\n\n");
+}
+
+char			*ft_strmjoinfree(char const *s1, char const *s2, int len_s1
+					, int len_s2)
+{
+	char	*str;
+	int		i;
+
+	i = 0;
+	// ft_printf("debug : %s %s %d %d\n", s1, s2, len_s1, len_s2);
+	if ((str = (char*)malloc(sizeof(str) * (len_s1 + len_s2) + 1)) == 0)
+		return (NULL);
+	if (s1 != NULL)
+		ft_strcpy(str, s1);
+	while (len_s2 > i)
 	{
-		count = 0;
-		while (str[i] != ' ')
-		{
-			if (str[i] == '-' && count == 0)
-			{
-				i++;
-				if (str[i] == '-')
-				{
-					args->arg_nf = 1;
-					i++;
-				}
-				else
-				{
-					while (str[i] && str[i] != ' ')
-					{
-						if (str[i] == 'p')
-							get_prompt(str, i, args);
-						else if (str[i] == 'q')
-							args->arg_q = 1;
-						else if (str[i] == 's')
-							args->arg_s = 1;
-						else if (str[i] == 'r')
-							args->arg_r = 1;
-						else
-							disp_usage_exit();
-						i++;
-					}
-				}
-			}
-		}
+		str[i + len_s1] = s2[i];
 		i++;
 	}
+	str[len_s1 + i] = 0;
+	free((void*)s1);
+	return (str);
+}
+
+void			get_prompt(t_args *args)
+{
+	(void)args;
+	char		buf[10000];
+	char		*str;
+	int			ret;
+	int			len;
+	int			i;
+
+
+	ret = -2;
+	i = 0;
+	str = NULL;
+	len = 0;
+	while ((ret = read(1, buf, 10000)) != 0)
+	{
+		str = ft_strmjoinfree(str, buf, len, ft_strlen(buf));
+		len = ft_strlen(str);
+	}
+	// ft_printf("%s", str);
+	return ;
+}
+
+int				parse_args(t_args *args, char *str, int i)
+{
+	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
+	{
+		if (str[i] == 'p')
+			get_prompt(args);
+		else if (str[i] == 'q')
+			args->arg_q = 1;
+		else if (str[i] == 's')
+			args->arg_s = 1;
+		else if (str[i] == 'r')
+			args->arg_r = 1;
+		else
+			exit(ft_dprintf(2, "Illegal option -- %c\nusage: ", str[i]) + 
+			ft_dprintf(2, "[md5;sha256] [-pqr] [-s string] [files ...]\n"));
+		i++;
+	}
+	return (i);
+}
+
+int				parse_file(t_args *args, char *str, int i)
+{
+	char		tmp[256];
+	char		*file;
+	int			j;
+
+	j = 0;
+	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
+	{
+		tmp[j] = str[i];
+		j++;
+		i++;
+	}
+	file = ft_memacpy(&tmp, j);
+	if (args->arg_s == 1)
+	{
+		args->arg_s = 0;
+	}
+	else
+	{
+		if (open(file, O_RDONLY) == -1)
+		{
+			ft_printf("%s: No such file or directory\n", file);
+			return (i);
+		}
+	}
+	return (i);
+}
+
+void		get_flags_args(t_args *args, char *str, int i)
+{
+	while (str[i])
+	{
+		if (str[i] == '-')
+		{
+			i++;
+			if (str[i] == '-')
+			{
+				args->arg_nf = 1;
+				if (str[++i] != ' ' && str[i] != '\t')
+					disp_usage_exit();
+			}
+			else
+				i = parse_args(args, str, i);
+		}
+		else if (str[i] != ' ' && str[i] != '\t')
+			i = parse_file(args, str, i);
+		if (str[i])
+			i++;
+	}
+	if (args->arg_s == 1 && args->arg_nf == 0)
+		disp_usage_exit();
 }
 
 int				check_mdarg(char *str, char **str_md)
@@ -64,12 +160,10 @@ int				check_mdarg(char *str, char **str_md)
 	int			i;
 
 	i = 0;
-	ft_printf("%s\n", str);
 	while (str_md[i])
 	{
 		if (ft_strcmp(str_md[i], str) == 0)
 		{
-			ft_printf("%d\n", i);
 			return (i);
 		}
 		i++;
@@ -77,7 +171,7 @@ int				check_mdarg(char *str, char **str_md)
 	return (-1);
 }
 
-void		*get_new_stdin(t_args *args, char **str_md)
+void		get_new_stdin(t_args *args, char **str_md)
 {
 	char		*str;
 	char		*tmp;
@@ -90,18 +184,25 @@ void		*get_new_stdin(t_args *args, char **str_md)
 		if (get_next_line(1, &str) == -1)
 			exit(ft_printf("get next line a pas kiffe\n"));
 		i = 0;
-		while (str[i] && (str[i] != ' ' || str[i] != '	'))
+		while (str[i] && (str[i] != ' ' && str[i] != '\t'))
 			i++;
 		tmp = ft_memacpy(str, i);
 		if ((args->md = check_mdarg(tmp, str_md)) > -1)
 		{
-			get_flags_args(args, str, str_md);
+			if (!str[i])
+			{
+				get_prompt(args);
+				return ;
+			}
+			get_flags_args(args, str, i);
+			return ;
 		}
 		else
 		{
-			disp_usage();
+			disp_usage_ssl(str);
 			ft_printf("ft_ssl> ");
 		}
+		free(tmp);
 		free(str);
 	}
 }
@@ -144,15 +245,24 @@ char		*split_args(int ac,char **av)
 
 void		parser(int argc, char **argv, t_args *args)
 {
-	char *str;
+	char		*str;
 	static char *str_md[2] = {"md5", "sha256"};
 
-	if ((args->md = check_mdarg(argv[1], str_md)) > -1)
+	if (argc > 1)
 	{
-		str = split_args(argc, argv);
-		get_flags_args(args, str, str_md);	
+		if ((args->md = check_mdarg(argv[1], str_md)) > -1)
+		{
+			str = split_args(argc, argv);
+			if (str == NULL)
+			{
+				get_prompt(args);
+				return ;
+			}
+			get_flags_args(args, str, 0);
+			return ;
+		}
+		else
+			disp_usage_ssl_exit(argv[1]);
 	}
-	else
-		disp_usage();
 	get_new_stdin(args, str_md);
 }
