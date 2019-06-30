@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/12 20:12:07 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/06/13 01:01:42 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/06/30 20:46:32 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,30 @@ unsigned int	rotate_left(unsigned int x, unsigned int c)
 	return (x);
 }
 
+void			md5_operations(int i, unsigned int *fghi, unsigned int *g, t_hash *hash)
+{
+	if (i < 16)
+	{
+		*fghi = (hash->bb & hash->cc) | ((~hash->bb) & hash->dd);
+		*g = i;
+	}
+	else if (i < 32)
+	{
+		*fghi = (hash->dd & hash->bb) | ((hash->cc) & (~hash->dd));
+		*g = (5 * i + 1) % 16;
+	}
+	else if (i < 48)
+	{
+		*fghi = hash->bb ^ hash->cc ^ hash->dd;
+		*g = (3 * i + 5) % 16;
+	}
+	else if (i < 64)
+	{
+		*fghi = hash->cc ^ (hash->bb | (~hash->dd));
+		*g = (7 * i) % 16;
+	}
+}
+
 void			md5_encrypt(t_hash *hash, unsigned int *w)
 {
 	unsigned int fghi;
@@ -72,26 +96,7 @@ void			md5_encrypt(t_hash *hash, unsigned int *w)
 	fghi = 0;
 	while (i < 64)
 	{
-		if (i < 16)
-		{
-			fghi = (hash->bb & hash->cc) | ((~hash->bb) & hash->dd);
-			g = i;
-		}
-		else if (i < 32)
-		{
-			fghi = (hash->dd & hash->bb) | ((hash->cc) & (~hash->dd));
-			g = (5 * i + 1) % 16;
-		}
-		else if (i < 48)
-		{
-			fghi = hash->bb ^ hash->cc ^ hash->dd;
-			g = (3 * i + 5) % 16;
-		}
-		else if (i < 64)
-		{
-			fghi = hash->cc ^ (hash->bb | (~hash->dd));
-			g = (7 * i) % 16;
-		}
+		md5_operations(i, &fghi, &g, hash);
 		tmp = hash->dd;
 		hash->dd = hash->cc;
 		hash->cc = hash->bb;
@@ -100,6 +105,22 @@ void			md5_encrypt(t_hash *hash, unsigned int *w)
 		hash->aa = tmp;
 		i++;
 	}
+}
+
+void		update_hash_pre(t_hash *hash)
+{
+	hash->aa = hash->a;
+	hash->bb = hash->b;
+	hash->cc = hash->c;
+	hash->dd = hash->d;
+}
+
+void		update_hash_post(t_hash *hash)
+{
+	hash->a += hash->aa;
+	hash->b += hash->bb;
+	hash->c += hash->cc;
+	hash->d += hash->dd;
 }
 
 void		md5(char *str, int len, t_hash *hash)
@@ -124,9 +145,11 @@ void		md5(char *str, int len, t_hash *hash)
  	ft_memcpy(msg + new_len, &bit_len, 4);
 	while (offset < new_len)
 	{
+		update_hash_pre(hash);
 		w = (unsigned int *)(msg + offset);
 		md5_encrypt(hash, w);
 		offset += 64;
+		update_hash_post(hash);
 	}
 	free(msg);
 }
@@ -142,10 +165,6 @@ void		algo_md5(t_args *args, char *str)
 	len = ft_strlen(str);
 	init_hash(&hash);
 	md5(str, len, &hash);
-	hash.a += hash.aa;
-	hash.b += hash.bb;
-	hash.c += hash.cc;
-	hash.d += hash.dd;
 	if (args->arg_s && !args->arg_q)
 		ft_printf("MD5 (\"%s\") = ", str);
 	p=(unsigned char *)&hash.a;
