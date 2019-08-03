@@ -4,6 +4,12 @@
 
 # include "ft_printf.h"
 
+/*
+** DEFINE MESSAGE DIGEST COMMAND 
+*/
+# define MDC_NB 2
+# define MDC_CMD {"md5", "sha256"}
+
 typedef struct s_args		t_args;
 typedef unsigned char		t_uint8;
 typedef struct s_file_queue	t_file_queue;
@@ -43,6 +49,6 @@ void			disp_usage();
 void			disp_usage_exit();
 void			disp_usage_ssl_exit(char *str);
 void			disp_usage_ssl(char *str);
-void			algo_md5(t_args *args, char *str);
+void			algo_md5(t_args *args, char *str, char *file);
 
 #endif

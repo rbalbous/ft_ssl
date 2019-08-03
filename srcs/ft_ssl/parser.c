@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/06/12 22:40:42 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/08/03 22:31:24 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ char			*ft_strmjoinfree(char const *s1, char const *s2, int len_s1
 	int		i;
 
 	i = 0;
-	// ft_printf("debug : %s %s %d %d\n", s1, s2, len_s1, len_s2);
 	if ((str = (char*)malloc(sizeof(str) * (len_s1 + len_s2) + 1)) == 0)
 		return (NULL);
 	if (s1 != NULL)
@@ -34,41 +33,73 @@ char			*ft_strmjoinfree(char const *s1, char const *s2, int len_s1
 	return (str);
 }
 
-void			get_prompt(t_args *args)
+void			treat_file(char *file, int fd, t_args *args)
 {
-	(void)args;
-	char		buf[10000];
+	char		buf[10001];
 	char		*str;
 	int			ret;
 	int			len;
 	int			i;
 
-
-	ret = -2;
 	i = 0;
 	str = NULL;
 	len = 0;
-	while ((ret = read(1, buf, 10000)) != 0)
+	while ((ret = read(fd, buf, 10000)) != 0)
 	{
-		str = ft_strmjoinfree(str, buf, len, ft_strlen(buf));
+		buf[ret] = 0;
+		str = ft_strmjoinfree(str, buf, len, ret);
 		len = ft_strlen(str);
 	}
-	algo_md5(args, str);
-	return ;
+	if (!args->arg_r)
+		ft_printf("MD5 (%s) = ", file);
+	algo_md5(args, str, NULL);
+	if (args->arg_r && !args->arg_q)
+	{
+		args->arg_r = 0;
+		ft_printf(" %s", file);
+	}
 }
 
-int				parse_args(t_args *args, char *str, int i)
+void			get_prompt(t_args *args)
+{
+	char		buff[10001];
+	char		*str;
+	int			ret;
+	int			len;
+	int			i;
+
+	i = 0;
+	str = NULL;
+	len = 0;
+	while ((ret = read(0, buff, 10000)) != 0)
+	{
+		buff[ret] = 0;
+		str = ft_strmjoinfree(str, buff, len, ret);
+		len = ft_strlen(str);
+	}
+	algo_md5(args, str, NULL);
+}
+
+int				 parse_args(t_args *args, char *str, int i)
 {
 	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
 	{
 		if (str[i] == 'p')
+		{
+			args->arg_p = 1;
 			get_prompt(args);
+		}
 		else if (str[i] == 'q')
 			args->arg_q = 1;
 		else if (str[i] == 's')
+		{
 			args->arg_s = 1;
+			return (i);
+		}
 		else if (str[i] == 'r')
+		{
 			args->arg_r = 1;
+		}
 		else
 			exit(ft_dprintf(2, "Illegal option -- %c\nusage: ", str[i]) + 
 			ft_dprintf(2, "[md5;sha256] [-pqr] [-s string] [files ...]\n"));
@@ -82,6 +113,7 @@ int				parse_file(t_args *args, char *str, int i)
 	char		tmp[256];
 	char		*file;
 	int			j;
+	int			fd;
 
 	j = 0;
 	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
@@ -93,15 +125,17 @@ int				parse_file(t_args *args, char *str, int i)
 	file = ft_memacpy(&tmp, j);
 	if (args->arg_s == 1)
 	{
+		algo_md5(args, str, NULL);
 		args->arg_s = 0;
 	}
 	else
 	{
-		if (open(file, O_RDONLY) == -1)
+		if ((fd = open(file, O_RDONLY)) == -1)
 		{
 			ft_printf("%s: No such file or directory\n", file);
 			return (i);
 		}
+		treat_file(file, fd, args);
 	}
 	return (i);
 }
@@ -129,6 +163,8 @@ void		get_flags_args(t_args *args, char *str, int i)
 	}
 	if (args->arg_s == 1 && args->arg_nf == 0)
 		disp_usage_exit();
+	if (args->arg_r == 1 && args->arg_nf == 0)
+		get_prompt(args);
 }
 
 int				check_mdarg(char *str, char **str_md)
@@ -136,7 +172,7 @@ int				check_mdarg(char *str, char **str_md)
 	int			i;
 
 	i = 0;
-	while (str_md[i])
+	while (i < MDC_NB)
 	{
 		if (ft_strcmp(str_md[i], str) == 0)
 		{
@@ -185,9 +221,9 @@ void		get_new_stdin(t_args *args, char **str_md)
 
 char		*split_args(int ac,char **av)
 {
-	int		i;
 	char 	*str;
 	int		count;
+	int		i;
 	int		j;
 
 	i = 2;
@@ -222,7 +258,7 @@ char		*split_args(int ac,char **av)
 void		parser(int argc, char **argv, t_args *args)
 {
 	char		*str;
-	static char *str_md[2] = {"md5", "sha256"};
+	static char *str_md[MDC_NB] = MDC_CMD;
 
 	if (argc > 1)
 	{

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   algo.c                                             :+:      :+:    :+:   */
+/*   md5.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/12 20:12:07 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/06/30 20:46:32 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/08/03 22:32:03 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ void			md5_encrypt(t_hash *hash, unsigned int *w)
 		tmp = hash->dd;
 		hash->dd = hash->cc;
 		hash->cc = hash->bb;
-        printf("rotateLeft(%x + %x + %x + %x, %d)\n", hash->aa, fghi, g_x[i], w[g], g_r[i]);
+        // printf("rotateLeft(%x + %x + %x + %x, %d)\n", hash->aa, fghi, g_x[i], w[g], g_r[i]);
 		hash->bb = hash->bb + rotate_left(hash->aa + fghi + g_x[i] + w[g], g_r[i]);
 		hash->aa = tmp;
 		i++;
@@ -154,19 +154,29 @@ void		md5(char *str, int len, t_hash *hash)
 	free(msg);
 }
 
-void		algo_md5(t_args *args, char *str)
+void		algo_md5(t_args *args, char *str, char *file)
 {
 	size_t		len;
 	t_hash		hash;
 	unsigned char *p;
 
-	(void)args;
 	hash = (t_hash){0, 0, 0, 0, 0, 0, 0, 0};
-	len = ft_strlen(str);
+	if (str != NULL)
+		len = ft_strlen(str);
+	else
+		len = 0;
 	init_hash(&hash);
 	md5(str, len, &hash);
-	if (args->arg_s && !args->arg_q)
+	if (args->arg_p && !args->arg_q && !args->arg_r)
+	{
+		args->arg_p = 0;
+		ft_printf("%s", str);
+	}
+	if (args->arg_s && !args->arg_q && !args->arg_r)
+	{
+		args->arg_s = 0;
 		ft_printf("MD5 (\"%s\") = ", str);
+	}
 	p=(unsigned char *)&hash.a;
 	ft_printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3]);
     p=(unsigned char *)&hash.b;
@@ -175,5 +185,9 @@ void		algo_md5(t_args *args, char *str)
 	ft_printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3]);
     p=(unsigned char *)&hash.d;
     ft_printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3]);
+	if (args->arg_r && args->arg_s && !args->arg_q)
+		ft_printf(" \"%s\"", str);
+	if (args->arg_r && file != NULL && !args->arg_q)
+		ft_printf(" %s", file);
 	ft_printf("\n");
 }
