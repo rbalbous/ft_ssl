@@ -6,11 +6,40 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/08/03 22:31:24 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/08/30 16:59:52 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
+
+void			do_hash(t_args *args, char *str, char *file)
+{
+	static void	(*hash[2])(t_args*, char*, char*) = {md5, sha256};
+
+	hash[args->md](args, str, file);
+}
+
+void			trim_str(t_args *args, char *str, char *file, int i)
+{
+	char		*to_hash;
+	int			index;
+
+	to_hash = NULL;
+	index = 0;
+	while (str[i + index] != 0 && str[i + index] != ' ' && str[i + index] != '	')
+	{
+		index++;
+	}
+	if (str[i + index] == 0)
+		do_hash(args, str + i, file);
+	else
+	{
+		if (!(to_hash = (char *)malloc(sizeof(to_hash) * (index + 1))))
+			exit(ft_dprintf(2, "malloc error while initializing 'to_hash'"));
+		ft_strncpy(to_hash, str + i, index);
+		do_hash(args, to_hash, file);
+	}
+}
 
 char			*ft_strmjoinfree(char const *s1, char const *s2, int len_s1
 					, int len_s2)
@@ -50,14 +79,7 @@ void			treat_file(char *file, int fd, t_args *args)
 		str = ft_strmjoinfree(str, buf, len, ret);
 		len = ft_strlen(str);
 	}
-	if (!args->arg_r)
-		ft_printf("MD5 (%s) = ", file);
-	algo_md5(args, str, NULL);
-	if (args->arg_r && !args->arg_q)
-	{
-		args->arg_r = 0;
-		ft_printf(" %s", file);
-	}
+	do_hash(args, str, file);
 }
 
 void			get_prompt(t_args *args)
@@ -77,7 +99,7 @@ void			get_prompt(t_args *args)
 		str = ft_strmjoinfree(str, buff, len, ret);
 		len = ft_strlen(str);
 	}
-	algo_md5(args, str, NULL);
+	do_hash(args, str, NULL);
 }
 
 int				 parse_args(t_args *args, char *str, int i)
@@ -114,8 +136,10 @@ int				parse_file(t_args *args, char *str, int i)
 	char		*file;
 	int			j;
 	int			fd;
+	int			tmp_i;
 
 	j = 0;
+	tmp_i = i;
 	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
 	{
 		tmp[j] = str[i];
@@ -125,7 +149,7 @@ int				parse_file(t_args *args, char *str, int i)
 	file = ft_memacpy(&tmp, j);
 	if (args->arg_s == 1)
 	{
-		algo_md5(args, str, NULL);
+		trim_str(args, str, NULL, tmp_i);
 		args->arg_s = 0;
 	}
 	else

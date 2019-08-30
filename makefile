@@ -10,7 +10,8 @@ OBJ_PATH = obj
 SRCS =	main.c \
 		parser.c \
 		display.c \
-		md5.c
+		md5.c \
+		sha256.c
 SRCS_PATH = srcs/ft_ssl
 SRCS_OBJ = $(addprefix $(OBJ_PATH)/, $(SRCS:.c=.o))
 

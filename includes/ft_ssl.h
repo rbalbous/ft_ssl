@@ -10,45 +10,72 @@
 # define MDC_NB 2
 # define MDC_CMD {"md5", "sha256"}
 
+/*
+** DEFINE CIPHER COMMAND
+*/
+# define CC_NB 1
+# define CC_CMD {"base64"}
+
 typedef struct s_args		t_args;
 typedef unsigned char		t_uint8;
 typedef struct s_file_queue	t_file_queue;
 typedef struct s_hash_md5	t_hash;
+typedef struct s_sha		t_sha;
 
 struct		s_args
 {
 	t_uint8 arg_q: 1;
 	t_uint8 arg_p: 1;
 	t_uint8 arg_s: 1;
-	t_uint8 arg_r: 1;
+	t_uint8 arg_r;
 	t_uint8 arg_nf: 1;
-	t_int8 md;
-};
-
-struct		s_file_queue
-{
-	char			*str;
-	t_file_queue	*next;
+	t_int32 md;
 };
 
 struct		s_hash_md5
 {
-	unsigned int a;
-	unsigned int b;
-	unsigned int c;
-	unsigned int d;
-	unsigned int aa;
-	unsigned int bb;
-	unsigned int cc;
-	unsigned int dd;
+	uint32_t a;
+	uint32_t b;
+	uint32_t c;
+	uint32_t d;
+	uint32_t aa;
+	uint32_t bb;
+	uint32_t cc;
+	uint32_t dd;
 };
 
+struct		s_sha
+{
+	uint32_t h0;
+	uint32_t h1;
+	uint32_t h2;
+	uint32_t h3;
+	uint32_t h4;
+	uint32_t h5;
+	uint32_t h6;
+	uint32_t h7;
+	uint32_t a;
+	uint32_t b;
+	uint32_t c;
+	uint32_t d;
+	uint32_t e;
+	uint32_t f;
+	uint32_t g;
+	uint32_t h;
+	uint32_t ch;
+	uint32_t s0;
+	uint32_t s1;
+	uint32_t maj;
+	uint32_t tmp1;
+	uint32_t tmp2;
+};
 
 void			parser(int argc, char **argv, t_args *args);
 void			disp_usage();
 void			disp_usage_exit();
 void			disp_usage_ssl_exit(char *str);
 void			disp_usage_ssl(char *str);
-void			algo_md5(t_args *args, char *str, char *file);
+void			md5(t_args *args, char *str, char *file);
+void			sha256(t_args *args, char *str, char *file);
 
 #endif
