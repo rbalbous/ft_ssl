@@ -5,6 +5,7 @@ print ("Runing the tests:")
 os.system("rm test_results.txt")
 Result = "V"
 Colored = "\033[92mV"
+Prompt = ""
 test_command = ""
 test_results = open("test_results.txt", "x")
 std = open(1, "r")
@@ -12,8 +13,9 @@ std = open(1, "r")
 
 # # TEST SCHEME
 # test = "INSERT_TEST"  #MODIFY INSERT_TEXT by the command line
+# Prompt = ""
 # test_results.write("Test X : " + test + "\n") #MODIFY X by the test number
-# test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
+# test_command = Prompt + "./ft_ssl md5 " + test + "  > my.txt && " + Prompt + "md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 # os.system(test_command)
 # if (os.stat("diff").st_size == 0):
 # 	Result = "V"
@@ -22,12 +24,13 @@ std = open(1, "r")
 # 	Result = "X"
 # 	Colored = "\033[91mX"
 # print (Colored, end = '')
-# test_results.write("Test X: " + Result + "\n\n") #MODIFY X by the test number
+# test_results.write("Test X : " + Result + "\n\n") #MODIFY X by the test number
 
 # TEST FAIL
 test="-r -s ok"
-test_results.write("Test FAIL : " + test + "\n")
-test_command = "./ft_ssl md5 " + test + " makefile > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
+Prompt = ""
+test_results.write("Test FAIL : " + "\n")
+test_command = Prompt + "./ft_ssl md5 " + test + " makefile > my.txt &&" + Prompt +  "md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
 if (os.stat("diff").st_size == 0):
 	Result = "V"
@@ -36,11 +39,11 @@ else:
 	Result = "X"
 	Colored = "\033[91mX"
 print (Colored, end = '')
-test_results.write("Test FAIL: " + Result + "\n\n")
+test_results.write("Test FAIL : " + Result + "\n\n")
 
 # TEST VALID
 test="-r -s ok"
-test_results.write("Test VALID : " + test + "\n")
+test_results.write("Test VALID : " + "\n")
 test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
 if (os.stat("diff").st_size == 0):
@@ -50,7 +53,7 @@ else:
 	Result = "X"
 	Colored = "\033[91mX"
 print (Colored, end = '')
-test_results.write("Test VALID: " + Result + "\n\n")
+test_results.write("Test VALID : " + Result + "\n\n")
 
 # TEST 1
 test="-r -s ok"
@@ -64,7 +67,7 @@ else:
 	Result = "X"
 	Colored = "\033[91mX"
 print (Colored, end = '')
-test_results.write("Test 1: " + Result + "\n\n")
+test_results.write("Test 1 : " + Result + "\n\n")
 
 # TEST 2
 test = "-r -s ok makefile"
@@ -78,10 +81,10 @@ else:
 	Result = "X"
 	Colored = "\033[91mX"
 print (Colored, end = '')
-test_results.write("Test 2: " + Result + "\n\n")
+test_results.write("Test 2 : " + Result + "\n\n")
 
 # TEST 3
-test = " -s ok makefile"
+test = "-s ok makefile"
 test_results.write("Test 3 : " + test + "\n")
 test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
@@ -92,7 +95,7 @@ else:
 	Result = "X"
 	Colored = "\033[91mX"
 print (Colored, end = '')
-test_results.write("Test 3: " + Result + "\n\n")
+test_results.write("Test 3 : " + Result + "\n\n")
 
 # TEST 4
 test = "-q -s ok makefile"
@@ -106,7 +109,7 @@ else:
 	Result = "X"
 	Colored = "\033[91mX"
 print (Colored, end = '')
-test_results.write("Test 4: " + Result + "\n\n")
+test_results.write("Test 4 : " + Result + "\n\n")
 
 # TEST 5
 test = "-q -r -s ok makefile"
@@ -119,9 +122,23 @@ if (os.stat("diff").st_size == 0):
 else:
 	Result = "X"
 	Colored = "\033[91mX"
-print (Colored)
-test_results.write("Test 5: " + Result + "\n\n")
+print (Colored, end = '')
+test_results.write("Test 5 : " + Result + "\n\n")
 
+# TEST PROMPT
+test = "-p"  #MODIFY INSERT_TEXT by the command line
+Prompt = "echo \"ok\" | "
+test_results.write("Test PROMPT : " + test + "\n") #MODIFY X by the test number
+test_command = Prompt + "./ft_ssl md5 " + test + "  > my.txt && " + Prompt + "md5 " + test + " > real.txt && diff my.txt real.txt > diff"
+os.system(test_command)
+if (os.stat("diff").st_size == 0):
+	Result = "V"
+	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
+print (Colored, end = '')
+test_results.write("Test PROMPT : " + Result + "\n\n") #MODIFY X by the test number
 
 #TEST END
 os.system("rm my.txt && rm real.txt && rm diff")
