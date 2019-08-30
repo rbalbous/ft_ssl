@@ -1,0 +1,21 @@
+Test FAIL : -r -s ok
+Test FAIL: X
+
+Test VALID : -r -s ok
+Test VALID: V
+
+Test 1 : -r -s ok
+Test 1: V
+
+Test 2 : -r -s ok makefile
+Test 2: V
+
+Test 3 :  -s ok makefile
+Test 3: V
+
+Test 4 : -q -s ok makefile
+Test 4: V
+
+Test 5 : -q -r -s ok makefile
+Test 5: V
+

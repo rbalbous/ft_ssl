@@ -15,26 +15,54 @@ std = open(1, "r")
 # test_results.write("Test X : " + test + "\n") #MODIFY X by the test number
 # test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 # os.system(test_command)
-# if (os.stat("diff").st_size != 0):
-# 	Result = "X"
-# 	Color = "\033[91mX"
-# else:
+# if (os.stat("diff").st_size == 0):
 # 	Result = "V"
 # 	Colored = "\033[92mV"
+# else:
+# 	Result = "X"
+# 	Colored = "\033[91mX"
 # print (Colored, end = '')
 # test_results.write("Test X: " + Result + "\n\n") #MODIFY X by the test number
+
+# TEST FAIL
+test="-r -s ok"
+test_results.write("Test FAIL : " + test + "\n")
+test_command = "./ft_ssl md5 " + test + " makefile > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
+os.system(test_command)
+if (os.stat("diff").st_size == 0):
+	Result = "V"
+	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
+print (Colored, end = '')
+test_results.write("Test FAIL: " + Result + "\n\n")
+
+# TEST VALID
+test="-r -s ok"
+test_results.write("Test VALID : " + test + "\n")
+test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
+os.system(test_command)
+if (os.stat("diff").st_size == 0):
+	Result = "V"
+	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
+print (Colored, end = '')
+test_results.write("Test VALID: " + Result + "\n\n")
 
 # TEST 1
 test="-r -s ok"
 test_results.write("Test 1 : " + test + "\n")
 test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
-if (os.stat("diff").st_size != 0):
-	Result = "X"
-	Color = "\033[91mX"
-else:
+if (os.stat("diff").st_size == 0):
 	Result = "V"
 	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
 print (Colored, end = '')
 test_results.write("Test 1: " + Result + "\n\n")
 
@@ -43,12 +71,12 @@ test = "-r -s ok makefile"
 test_results.write("Test 2 : " + test + "\n")
 test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
-if (os.stat("diff").st_size != 0):
-	Result = "X"
-	Color = "\033[91mX"
-else:
+if (os.stat("diff").st_size == 0):
 	Result = "V"
 	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
 print (Colored, end = '')
 test_results.write("Test 2: " + Result + "\n\n")
 
@@ -57,12 +85,12 @@ test = " -s ok makefile"
 test_results.write("Test 3 : " + test + "\n")
 test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
-if (os.stat("diff").st_size != 0):
-	Result = "X"
-	Color = "\033[91mX"
-else:
+if (os.stat("diff").st_size == 0):
 	Result = "V"
 	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
 print (Colored, end = '')
 test_results.write("Test 3: " + Result + "\n\n")
 
@@ -71,12 +99,12 @@ test = "-q -s ok makefile"
 test_results.write("Test 4 : " + test + "\n")
 test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
-if (os.stat("diff").st_size != 0):
-	Result = "X"
-	Color = "\033[91mX"
-else:
+if (os.stat("diff").st_size == 0):
 	Result = "V"
 	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
 print (Colored, end = '')
 test_results.write("Test 4: " + Result + "\n\n")
 
@@ -85,12 +113,12 @@ test = "-q -r -s ok makefile"
 test_results.write("Test 5 : " + test + "\n")
 test_command = "./ft_ssl md5 " + test + "  > my.txt && md5 " + test + " > real.txt && diff my.txt real.txt > diff"
 os.system(test_command)
-if (os.stat("diff").st_size != 0):
-	Result = "X"
-	Color = "\033[91mX"
-else:
+if (os.stat("diff").st_size == 0):
 	Result = "V"
 	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
 print (Colored)
 test_results.write("Test 5: " + Result + "\n\n")
 
