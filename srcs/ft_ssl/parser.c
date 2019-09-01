@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/08/30 16:59:52 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/01 16:46:41 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ int				 parse_args(t_args *args, char *str, int i)
 		}
 		else
 			exit(ft_dprintf(2, "Illegal option -- %c\nusage: ", str[i]) + 
-			ft_dprintf(2, "[md5;sha256] [-pqr] [-s string] [files ...]\n"));
+			ft_dprintf(2, USAGE));
 		i++;
 	}
 	return (i);
@@ -196,7 +196,7 @@ int				check_mdarg(char *str, char **str_md)
 	int			i;
 
 	i = 0;
-	while (i < MDC_NB)
+	while (i < CMD_NB)
 	{
 		if (ft_strcmp(str_md[i], str) == 0)
 		{
@@ -282,7 +282,7 @@ char		*split_args(int ac,char **av)
 void		parser(int argc, char **argv, t_args *args)
 {
 	char		*str;
-	static char *str_md[MDC_NB] = MDC_CMD;
+	static char *str_md[CMD_NB] = CMD_LINE;
 
 	if (argc > 1)
 	{

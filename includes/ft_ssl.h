@@ -5,16 +5,11 @@
 # include "ft_printf.h"
 
 /*
-** DEFINE MESSAGE DIGEST COMMAND 
+** DEFINE COMMANDS
 */
-# define MDC_NB 2
-# define MDC_CMD {"md5", "sha256"}
-
-/*
-** DEFINE CIPHER COMMAND
-*/
-# define CC_NB 1
-# define CC_CMD {"base64"}
+# define CMD_NB 3
+# define CMD_LINE {"md5", "sha256", "base64"}
+# define USAGE "[md5;sha256] [-pqr] [-s string] [files ...]\n"
 
 typedef struct s_args		t_args;
 typedef unsigned char		t_uint8;

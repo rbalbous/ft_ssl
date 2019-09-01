@@ -1,21 +1,36 @@
-Test FAIL : -r -s ok
-Test FAIL: X
+Test FAIL : 
+Test FAIL : X
 
-Test VALID : -r -s ok
-Test VALID: V
+Test VALID : 
+Test VALID : V
 
 Test 1 : -r -s ok
-Test 1: V
+Test 1 : V
 
 Test 2 : -r -s ok makefile
-Test 2: V
+Test 2 : V
 
-Test 3 :  -s ok makefile
-Test 3: V
+Test 3 : -s ok makefile
+Test 3 : V
 
 Test 4 : -q -s ok makefile
-Test 4: V
+Test 4 : V
 
 Test 5 : -q -r -s ok makefile
-Test 5: V
+Test 5 : V
+
+Test PROMPT : -p | echo "ok" | 
+Test PROMPT : V
+
+Test 6 : -r -s ok
+Test 6 : V
+
+Test 7 : -r -s ok -q
+Test 7 : V
+
+Test 8 : -r -s ok -q
+Test 8 : V
+
+Test FAIL II : -r -s ok makefile -s ok
+Test FAIL II : X
 
