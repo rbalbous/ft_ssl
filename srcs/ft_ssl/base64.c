@@ -1,22 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   base64.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/04 20:59:39 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/04 13:12:34 by rbalbous         ###   ########.fr       */
+/*   Created: 2019/09/01 16:52:42 by rbalbous          #+#    #+#             */
+/*   Updated: 2019/09/07 18:57:40 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
 
-int			main(int argc, char **argv)
+int		parse_base64(char **str, t_args *args, int argc)
 {
-	t_args args;
-
-	args = (t_args){0, 0, 0, 0, 0, -1, 0};
-	parser(argc, argv, &args);
+	(void)args;
+	(void)str;;
+	(void)argc;
 	return (0);
 }

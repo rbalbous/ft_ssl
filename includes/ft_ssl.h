@@ -7,8 +7,12 @@
 /*
 ** DEFINE COMMANDS
 */
-# define CMD_NB 3
-# define CMD_LINE {"md5", "sha256", "base64"}
+# define MDC_NB 2
+# define MDC_LINE {"md5", "sha256"}
+# define CMD_NB 4
+# define CMD_LINE {"", "md5", "sha256", "base64"}
+
+
 # define USAGE "[md5;sha256] [-pqr] [-s string] [files ...]\n"
 
 typedef struct s_args		t_args;
@@ -25,6 +29,7 @@ struct		s_args
 	t_uint8 arg_r;
 	t_uint8 arg_nf: 1;
 	t_int32 md;
+	t_int32 error;
 };
 
 struct		s_hash_md5
@@ -66,11 +71,16 @@ struct		s_sha
 };
 
 void			parser(int argc, char **argv, t_args *args);
-void			disp_usage();
+int				disp_usage();
 void			disp_usage_exit();
 void			disp_usage_ssl_exit(char *str);
 void			disp_usage_ssl(char *str);
 void			md5(t_args *args, char *str, char *file);
 void			sha256(t_args *args, char *str, char *file);
-
+char			*get_prompt();
+int				get_flags_args(t_args *args, char **str, int argc);
+char			*split_args(int ac,char **av);
+int				parse_md(char **str, t_args *args, int argc);
+int				parse_base64(char **str, t_args *args, int argc);
+void			do_hash(t_args *args, char *str, char *file);
 #endif

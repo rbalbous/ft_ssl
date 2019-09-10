@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/01 16:46:41 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/07 22:36:28 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,54 @@ void			do_hash(t_args *args, char *str, char *file)
 	static void	(*hash[2])(t_args*, char*, char*) = {md5, sha256};
 
 	hash[args->md](args, str, file);
+}
+
+size_t	countwords(const char *s)
+{
+	size_t	count_words;
+	size_t	i;
+
+	count_words = 0;
+	if (s[0] != ' ' || s[0] != '\t')
+		count_words++;
+	i = 0;
+	while (s[++i])
+		if (s[i] != ' ' &&  s[i] != '\t' 
+		&& (s[i - 1] == ' ' || s[i - 1] == '\t'))
+			count_words++;
+	return (count_words);
+}
+
+char			**strsplit(const char *s, int *argc, char **str)
+{
+	size_t	i;
+	size_t	index;
+	size_t	ct_let;
+
+	index = -1;
+	i = 1;
+	if (!s)
+		return (NULL);
+	if ((str = (char**)malloc(sizeof(char*) * (countwords(s) + 1 + 1))) == 0)
+		return (NULL);
+	str[0] = 0;
+	while (++index < ft_strlen(s))
+	{
+		ct_let = 0;
+		if (s[ct_let + index] != ' ' && s[ct_let + index] != '\t'
+		&& s[ct_let + index] != '\0')
+		{
+			while (s[ct_let + index] != ' ' && s[ct_let + index] != '\t'
+			&& index + ct_let < ft_strlen(s))
+				ct_let++;
+			str[i] = ft_strsub(s, (unsigned int)index, ct_let);
+			index += ct_let - 1;
+			i++;
+		}
+	}
+	str[i] = 0;
+	*argc = i - 1;
+	return (str);
 }
 
 void			trim_str(t_args *args, char *str, char *file, int i)
@@ -82,7 +130,7 @@ void			treat_file(char *file, int fd, t_args *args)
 	do_hash(args, str, file);
 }
 
-void			get_prompt(t_args *args)
+char			*get_prompt()
 {
 	char		buff[10001];
 	char		*str;
@@ -99,17 +147,20 @@ void			get_prompt(t_args *args)
 		str = ft_strmjoinfree(str, buff, len, ret);
 		len = ft_strlen(str);
 	}
-	do_hash(args, str, NULL);
+	return (str);
 }
 
 int				 parse_args(t_args *args, char *str, int i)
 {
+	char	*tmp;
+
 	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
 	{
 		if (str[i] == 'p')
 		{
 			args->arg_p = 1;
-			get_prompt(args);
+			tmp = get_prompt();
+			do_hash(args, tmp, NULL);
 		}
 		else if (str[i] == 'q')
 			args->arg_q = 1;
@@ -164,56 +215,70 @@ int				parse_file(t_args *args, char *str, int i)
 	return (i);
 }
 
-void		get_flags_args(t_args *args, char *str, int i)
+int			get_flags_args(t_args *args, char **str, int argc)
 {
-	while (str[i])
+	char *tmp;
+	int i;
+
+	while (str[argc])
 	{
-		if (str[i] == '-')
+		i = 0;
+		if (str[argc][i] == '-')
 		{
 			i++;
-			if (str[i] == '-')
+			if (str[argc][i] == '-')
 			{
 				args->arg_nf = 1;
-				if (str[++i] != ' ' && str[i] != '\t')
-					disp_usage_exit();
+				if (str[argc][++i] != ' ' && str[argc][i] != '\t')
+					disp_usage(args);
 			}
 			else
-				i = parse_args(args, str, i);
+				i = parse_args(args, str[argc], i);
 		}
-		else if (str[i] != ' ' && str[i] != '\t')
-			i = parse_file(args, str, i);
+		else if (str[argc][i] != ' ' && str[argc][i] != '\t')
+			i = parse_file(args, str[argc], i);
 		if (str[i])
 			i++;
 	}
 	if (args->arg_s == 1 && args->arg_nf == 0)
-		disp_usage_exit();
+		disp_usage(args);
 	if (args->arg_r == 1 && args->arg_nf == 0)
-		get_prompt(args);
+	{
+		tmp = get_prompt();
+		do_hash(args, tmp, NULL);
+	}
+	return (argc);
 }
 
-int				check_mdarg(char *str, char **str_md)
+void			check_mdarg(char **str, char **str_md, t_args *args, int argc)
 {
 	int			i;
+	int			(*parsing[CMD_NB + 1])() = {disp_usage, parse_md, parse_md, parse_base64};
 
-	i = 0;
-	while (i < CMD_NB)
+	i = CMD_NB - 1;
+	while (i > 0)
 	{
-		if (ft_strcmp(str_md[i], str) == 0)
+		if (ft_strcmp(str_md[i], str[1]) == 0)
 		{
-			return (i);
+			break ;
 		}
-		i++;
+		i--;
 	}
-	return (-1);
+	args->md = i;
+	parsing[i](str, args, argc);
 }
 
 void		get_new_stdin(t_args *args, char **str_md)
 {
 	char		*str;
 	char		*tmp;
+	char		**argv;
+	int			argc;
 	int			i;
 
 	tmp = NULL;
+	argc = 0;
+	argv = NULL;
 	ft_printf("ft_ssl> ");
 	while (1)
 	{
@@ -223,27 +288,17 @@ void		get_new_stdin(t_args *args, char **str_md)
 		while (str[i] && (str[i] != ' ' && str[i] != '\t'))
 			i++;
 		tmp = ft_memacpy(str, i);
-		if ((args->md = check_mdarg(tmp, str_md)) > -1)
-		{
-			if (!str[i])
-			{
-				get_prompt(args);
-				return ;
-			}
-			get_flags_args(args, str, i);
-			return ;
-		}
-		else
-		{
-			disp_usage_ssl(str);
-			ft_printf("ft_ssl> ");
-		}
+		argv = strsplit(tmp, &argc, argv);
+		args->error = 2;
+		check_mdarg(argv, str_md, args, 1);
+		disp_usage(args);
+		ft_printf("ft_ssl> ");
 		free(tmp);
 		free(str);
 	}
 }
 
-char		*split_args(int ac,char **av)
+char		*split_args(int ac, char **av)
 {
 	char 	*str;
 	int		count;
@@ -281,24 +336,14 @@ char		*split_args(int ac,char **av)
 
 void		parser(int argc, char **argv, t_args *args)
 {
-	char		*str;
 	static char *str_md[CMD_NB] = CMD_LINE;
 
 	if (argc > 1)
 	{
-		if ((args->md = check_mdarg(argv[1], str_md)) > -1)
-		{
-			str = split_args(argc, argv);
-			if (str == NULL)
-			{
-				get_prompt(args);
-				return ;
-			}
-			get_flags_args(args, str, 0);
-			return ;
-		}
-		else
-			disp_usage_ssl_exit(argv[1]);
+		args->error = 0;
+		ft_printf("parser\n");
+		check_mdarg(argv, str_md, args, argc);
 	}
-	get_new_stdin(args, str_md);
+	else
+		get_new_stdin(args, str_md);
 }
