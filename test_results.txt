@@ -34,3 +34,6 @@ Test 8 : V
 Test FAIL II : -r -s ok makefile -s ok
 Test FAIL II : X
 
+Test 9 : ok
+Test 9 : V
+

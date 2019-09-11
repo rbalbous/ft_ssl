@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/12 20:12:07 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/11 16:03:18 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/11 23:30:44 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,17 +154,17 @@ void		algo_md5(char *str, uint32_t len, t_hash *hash)
 	free(msg);
 }
 
-void		md5(t_args *args, char *str, char *file)
+void		md5(t_args *args, t_infos *infos, char *str, char *file)
 {
 	uint32_t	len;
 	t_hash		hash;
 	unsigned char *p;
 
 	hash = (t_hash){0, 0, 0, 0, 0, 0, 0, 0};
-	if (str != NULL)
+	if (infos->len == 0 && str != NULL)
 		len = ft_strlen(str);
 	else
-		len = 0;
+		len = infos->len;
 	init_hash_md5(&hash);
 	algo_md5(str, len, &hash);
 	if (args->arg_r)

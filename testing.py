@@ -222,6 +222,25 @@ else:
 print (Colored, end = '')
 test_results.write("Test " + test_name + " : " + Result + "\n\n")
 
+# TEST 9
+test_name = "9"
+test = "ok"
+Prompt = ""
+test_results.write("Test " + test_name + " : " + test)
+if (Prompt != ""):
+	test_results.write(" | " + Prompt)
+test_results.write("\n")
+test_command = Prompt + "./ft_ssl md5 " + test + "  > my.txt && " + Prompt + "md5 " + test + " > real.txt && diff my.txt real.txt > diff"
+os.system(test_command)
+if (os.stat("diff").st_size == 0):
+	Result = "V"
+	Colored = "\033[92mV"
+else:
+	Result = "X"
+	Colored = "\033[91mX"
+print (Colored, end = '')
+test_results.write("Test " + test_name + " : " + Result + "\n\n")
+
 #TEST END
 os.system("rm my.txt && rm real.txt && rm diff")
 test_results.close()

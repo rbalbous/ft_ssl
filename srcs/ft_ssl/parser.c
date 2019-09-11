@@ -6,17 +6,17 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/11 00:32:08 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/11 23:30:58 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
 
-void			do_hash(t_args *args, char *str, char *file)
+void			do_hash(t_args *args, t_infos *infos, char *str, char *file)
 {
-	static void	(*hash[3])(t_args*, char*, char*) = {md5, sha256};
+	static void	(*hash[3])(t_args*, t_infos *infos, char*, char*) = {md5, sha256};
 
-	hash[args->md - 1](args, str, file);
+	hash[infos->md - 1](args, infos, str, file);
 }
 
 size_t	countwords(const char *s)
@@ -88,7 +88,7 @@ char			*ft_strmjoinfree(char const *s1, char const *s2, int len_s1
 	return (str);
 }
 
-void			treat_file(char *file, int fd, t_args *args)
+void			treat_file(t_args *args, t_infos *infos, char *file, int fd)
 {
 	char		buf[10001];
 	char		*str;
@@ -99,16 +99,18 @@ void			treat_file(char *file, int fd, t_args *args)
 	i = 0;
 	str = NULL;
 	len = 0;
+	infos->len = 0;
 	while ((ret = read(fd, buf, 10000)) != 0)
 	{
+		infos->len += ret;
 		buf[ret] = 0;
 		str = ft_strmjoinfree(str, buf, len, ret);
-		len = ft_strlen(str);
+		len = infos->len;
 	}
-	do_hash(args, str, file);
+	do_hash(args, infos, str, file);
 }
 
-void		get_prompt(t_args *args)
+void		get_prompt(t_args *args, t_infos *infos)
 {
 	char		buff[10001];
 	char		*str;
@@ -125,17 +127,17 @@ void		get_prompt(t_args *args)
 		str = ft_strmjoinfree(str, buff, len, ret);
 		len = ft_strlen(str);
 	}
-	do_hash(args, str, NULL);
+	do_hash(args, infos, str, NULL);
 }
 
-int				 parse_args(t_args *args, char *str, int i)
+int				 parse_args(t_args *args, t_infos *infos, char *str, int i)
 {
 	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
 	{
 		if (str[i] == 'p')
 		{
 			args->arg_p = 1;
-			get_prompt(args);
+			get_prompt(args, infos);
 		}
 		else if (str[i] == 'q')
 			args->arg_q = 1;
@@ -156,7 +158,7 @@ int				 parse_args(t_args *args, char *str, int i)
 	return (i);
 }
 
-int				parse_file(t_args *args, char *str, int i)
+int				parse_file(t_args *args, t_infos *infos, char *str, int i)
 {
 	char		tmp[256];
 	char		*file;
@@ -172,7 +174,7 @@ int				parse_file(t_args *args, char *str, int i)
 	file = ft_memacpy(&tmp, i);
 	if (args->arg_s == 1)
 	{
-		do_hash(args, str, NULL);
+		do_hash(args, infos, str, NULL);
 		args->arg_s = 0;
 	}
 	else
@@ -182,12 +184,12 @@ int				parse_file(t_args *args, char *str, int i)
 			ft_printf("%s: No such file or directory\n", file);
 			return (i);
 		}
-		treat_file(file, fd, args);
+		treat_file(args, infos, file, fd);
 	}
 	return (i);
 }
 
-int			get_flags_args(t_args *args, char **str, int argc)
+int			get_flags_args(t_args *args, t_infos *infos, char **str, int argc)
 {
 	int i;
 	int	end;
@@ -206,10 +208,10 @@ int			get_flags_args(t_args *args, char **str, int argc)
 					disp_usage(args);
 			}
 			else
-				i = parse_args(args, str[end], i);
+				i = parse_args(args, infos, str[end], i);
 		}
 		else if (str[end][i] != ' ' && str[end][i] != '\t')
-			i = parse_file(args, str[end], i);
+			i = parse_file(args, infos, str[end], i);
 		if (str[i])
 			i++;
 		end++;
@@ -218,13 +220,14 @@ int			get_flags_args(t_args *args, char **str, int argc)
 		disp_usage(args);
 	if (args->arg_r == 1 && args->arg_nf == 0)
 	{
-		get_prompt(args);
+		get_prompt(args, infos);
 	}
 	return (end);
 }
 
-void			check_mdarg(char **str, char **str_md, t_args *args, int argc)
+void			check_mdarg(t_args *args, t_infos *infos, char **str, int argc)
 {
+	static char *str_md[CMD_NB] = CMD_LINE;
 	int			i;
 	int			(*parsing[CMD_NB + 1])() = {disp_usage, parse_md, parse_md, parse_base64};
 
@@ -237,11 +240,11 @@ void			check_mdarg(char **str, char **str_md, t_args *args, int argc)
 		}
 		i--;
 	}
-	args->md = i;
-	parsing[i](str, args, argc);
+	infos->md = i;
+	parsing[i](args, infos, str, argc);
 }
 
-void		get_new_stdin(t_args *args, char **str_md)
+void		get_new_stdin(t_args *args, t_infos *infos)
 {
 	char		*str;
 	char		*tmp;
@@ -262,8 +265,8 @@ void		get_new_stdin(t_args *args, char **str_md)
 			i++;
 		tmp = ft_memacpy(str, i);
 		argv = strsplit(tmp, &argc, argv);
-		args->error = 2;
-		check_mdarg(argv, str_md, args, 1);
+		infos->error = 2;
+		check_mdarg(args, infos, argv, 1);
 		ft_printf("ft_ssl> ");
 		free(tmp);
 		free(str);
@@ -306,14 +309,12 @@ char		*split_args(int ac, char **av)
 	return (str);
 }
 
-void		parser(int argc, char **argv, t_args *args)
+void		parser(int argc, char **argv, t_args *args, t_infos *infos)
 {
-	static char *str_md[CMD_NB] = CMD_LINE;
-
 	if (argc > 1)
 	{
-		check_mdarg(argv, str_md, args, argc);
+		check_mdarg(args, infos, argv, argc);
 	}
 	else
-		get_new_stdin(args, str_md);
+		get_new_stdin(args, infos);
 }

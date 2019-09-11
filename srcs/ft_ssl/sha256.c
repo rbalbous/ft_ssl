@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/11 18:06:56 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/08/28 13:12:54 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/11 22:56:32 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,15 +212,15 @@ void		algo_sha(char *str, uint32_t len, t_sha *sha)
 	free(msg);
 }
 
-void		sha256(t_args *args, char *str, char *file)
+void		sha256(t_args *args, t_infos *infos, char *str, char *file)
 {
 	size_t		len;
 	t_sha		sha;
 
-	if (str != NULL)
+	if (infos->len == 0 && str != NULL)
 		len = ft_strlen(str);
 	else
-		len = 0;
+		len = infos->len;
 	init_sha(&sha);
 	algo_sha(str, len, &sha);
 	(void)file;

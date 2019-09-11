@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/12 19:47:03 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/10 23:32:34 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/11 22:15:03 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,11 @@ int			us_ssl(char *str)
 	return (0);
 }
 
-int			disp_usage(char *str, t_args *args)
+int			disp_usage(t_args *args, t_infos *infos)
 {
 	static int		(*error[4])() = {us_ssl, us_ssl_exit, us, us_exit};
 
-	(void)str;
-	error[args->error]();
+	(void)args;
+	error[infos->error]();
 	return (0);
 }
