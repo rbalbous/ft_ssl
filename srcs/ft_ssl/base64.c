@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/01 16:52:42 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/07 18:57:40 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/11 16:03:59 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 int		parse_base64(char **str, t_args *args, int argc)
 {
 	(void)args;
-	(void)str;;
+	(void)str;
 	(void)argc;
 	return (0);
 }

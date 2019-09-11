@@ -77,7 +77,7 @@ void			disp_usage_ssl_exit(char *str);
 void			disp_usage_ssl(char *str);
 void			md5(t_args *args, char *str, char *file);
 void			sha256(t_args *args, char *str, char *file);
-char			*get_prompt();
+void			get_prompt(t_args *args);
 int				get_flags_args(t_args *args, char **str, int argc);
 char			*split_args(int ac,char **av);
 int				parse_md(char **str, t_args *args, int argc);

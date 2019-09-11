@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/07 22:36:28 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/11 00:32:08 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 void			do_hash(t_args *args, char *str, char *file)
 {
-	static void	(*hash[2])(t_args*, char*, char*) = {md5, sha256};
+	static void	(*hash[3])(t_args*, char*, char*) = {md5, sha256};
 
-	hash[args->md](args, str, file);
+	hash[args->md - 1](args, str, file);
 }
 
 size_t	countwords(const char *s)
@@ -67,28 +67,6 @@ char			**strsplit(const char *s, int *argc, char **str)
 	return (str);
 }
 
-void			trim_str(t_args *args, char *str, char *file, int i)
-{
-	char		*to_hash;
-	int			index;
-
-	to_hash = NULL;
-	index = 0;
-	while (str[i + index] != 0 && str[i + index] != ' ' && str[i + index] != '	')
-	{
-		index++;
-	}
-	if (str[i + index] == 0)
-		do_hash(args, str + i, file);
-	else
-	{
-		if (!(to_hash = (char *)malloc(sizeof(to_hash) * (index + 1))))
-			exit(ft_dprintf(2, "malloc error while initializing 'to_hash'"));
-		ft_strncpy(to_hash, str + i, index);
-		do_hash(args, to_hash, file);
-	}
-}
-
 char			*ft_strmjoinfree(char const *s1, char const *s2, int len_s1
 					, int len_s2)
 {
@@ -130,7 +108,7 @@ void			treat_file(char *file, int fd, t_args *args)
 	do_hash(args, str, file);
 }
 
-char			*get_prompt()
+void		get_prompt(t_args *args)
 {
 	char		buff[10001];
 	char		*str;
@@ -147,20 +125,17 @@ char			*get_prompt()
 		str = ft_strmjoinfree(str, buff, len, ret);
 		len = ft_strlen(str);
 	}
-	return (str);
+	do_hash(args, str, NULL);
 }
 
 int				 parse_args(t_args *args, char *str, int i)
 {
-	char	*tmp;
-
 	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
 	{
 		if (str[i] == 'p')
 		{
 			args->arg_p = 1;
-			tmp = get_prompt();
-			do_hash(args, tmp, NULL);
+			get_prompt(args);
 		}
 		else if (str[i] == 'q')
 			args->arg_q = 1;
@@ -185,22 +160,19 @@ int				parse_file(t_args *args, char *str, int i)
 {
 	char		tmp[256];
 	char		*file;
-	int			j;
 	int			fd;
 	int			tmp_i;
 
-	j = 0;
 	tmp_i = i;
-	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
+	while (str[i])
 	{
-		tmp[j] = str[i];
-		j++;
+		tmp[i] = str[i];
 		i++;
 	}
-	file = ft_memacpy(&tmp, j);
+	file = ft_memacpy(&tmp, i);
 	if (args->arg_s == 1)
 	{
-		trim_str(args, str, NULL, tmp_i);
+		do_hash(args, str, NULL);
 		args->arg_s = 0;
 	}
 	else
@@ -217,37 +189,38 @@ int				parse_file(t_args *args, char *str, int i)
 
 int			get_flags_args(t_args *args, char **str, int argc)
 {
-	char *tmp;
 	int i;
+	int	end;
 
-	while (str[argc])
+	end = 2;
+	while (end < argc)
 	{
 		i = 0;
-		if (str[argc][i] == '-')
+		if (str[end][i] == '-')
 		{
 			i++;
-			if (str[argc][i] == '-')
+			if (str[end][i] == '-')
 			{
 				args->arg_nf = 1;
-				if (str[argc][++i] != ' ' && str[argc][i] != '\t')
+				if (str[end][++i] != ' ' && str[end][i] != '\t')
 					disp_usage(args);
 			}
 			else
-				i = parse_args(args, str[argc], i);
+				i = parse_args(args, str[end], i);
 		}
-		else if (str[argc][i] != ' ' && str[argc][i] != '\t')
-			i = parse_file(args, str[argc], i);
+		else if (str[end][i] != ' ' && str[end][i] != '\t')
+			i = parse_file(args, str[end], i);
 		if (str[i])
 			i++;
+		end++;
 	}
 	if (args->arg_s == 1 && args->arg_nf == 0)
 		disp_usage(args);
 	if (args->arg_r == 1 && args->arg_nf == 0)
 	{
-		tmp = get_prompt();
-		do_hash(args, tmp, NULL);
+		get_prompt(args);
 	}
-	return (argc);
+	return (end);
 }
 
 void			check_mdarg(char **str, char **str_md, t_args *args, int argc)
@@ -291,7 +264,6 @@ void		get_new_stdin(t_args *args, char **str_md)
 		argv = strsplit(tmp, &argc, argv);
 		args->error = 2;
 		check_mdarg(argv, str_md, args, 1);
-		disp_usage(args);
 		ft_printf("ft_ssl> ");
 		free(tmp);
 		free(str);
@@ -340,8 +312,6 @@ void		parser(int argc, char **argv, t_args *args)
 
 	if (argc > 1)
 	{
-		args->error = 0;
-		ft_printf("parser\n");
 		check_mdarg(argv, str_md, args, argc);
 	}
 	else
