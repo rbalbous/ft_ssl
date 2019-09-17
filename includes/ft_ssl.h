@@ -1,6 +1,18 @@
-#ifndef FT_SSL
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_ssl.h                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/09/17 14:56:20 by rbalbous          #+#    #+#             */
+/*   Updated: 2019/09/17 15:21:18 by rbalbous         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-# define FT_SSL
+#ifndef FT_SSL_H
+
+# define FT_SSL_H
 
 # include "ft_printf.h"
 
@@ -21,6 +33,7 @@ typedef unsigned char		t_uint8;
 typedef struct s_file_queue	t_file_queue;
 typedef struct s_hash_md5	t_hash;
 typedef struct s_sha		t_sha;
+typedef struct s_base		t_base;
 
 struct		s_args
 {
@@ -28,6 +41,10 @@ struct		s_args
 	t_uint8 arg_p: 1;
 	t_uint8 arg_s: 1;
 	t_uint8 arg_r;
+	t_uint8 arg_d: 1;
+	t_uint8 arg_e: 1;
+	t_uint8 arg_i: 1;
+	t_uint8 arg_o: 1;
 	t_uint8 arg_nf: 1;
 };
 
@@ -77,6 +94,14 @@ struct		s_sha
 	uint32_t tmp2;
 };
 
+struct		s_base
+{
+	uint8_t h0;
+	uint8_t h1;
+	uint8_t h2;
+	uint8_t h3;
+};
+
 void			parser(int argc, char **argv, t_args *args, t_infos *infos);
 int				disp_usage();
 void			disp_usage_exit();
@@ -84,10 +109,11 @@ void			disp_usage_ssl_exit(char *str);
 void			disp_usage_ssl(char *str);
 void			md5(t_args *args, t_infos *infos, char *str, char *file);
 void			sha256(t_args *args, t_infos *infos, char *str, char *file);
-void			get_prompt(t_args *args, t_infos *infos);
+void			treat_file(t_args *args, t_infos *infos, char *file, int fd);
 int				get_flags_args(t_args *args, t_infos *infos, char **str, int argc);
 char			*split_args(int ac,char **av);
 int				parse_md(t_args *args, t_infos *infos, char **str, int argc);
 int				parse_base64(t_args *args, t_infos *infos, char **str, int argc);
 void			do_hash(t_args *args, t_infos *infos, char *str, char *file);
+void			base64(t_args *args, t_infos *infos, char *str, char *file);
 #endif

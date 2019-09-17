@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 21:06:12 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/11 23:30:58 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/16 17:27:00 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void			do_hash(t_args *args, t_infos *infos, char *str, char *file)
 {
-	static void	(*hash[3])(t_args*, t_infos *infos, char*, char*) = {md5, sha256};
+	static void	(*hash[4])(t_args*, t_infos *, char*, char*) = {md5, sha256, base64};
 
 	hash[infos->md - 1](args, infos, str, file);
 }
@@ -110,26 +110,6 @@ void			treat_file(t_args *args, t_infos *infos, char *file, int fd)
 	do_hash(args, infos, str, file);
 }
 
-void		get_prompt(t_args *args, t_infos *infos)
-{
-	char		buff[10001];
-	char		*str;
-	int			ret;
-	int			len;
-	int			i;
-
-	i = 0;
-	str = NULL;
-	len = 0;
-	while ((ret = read(0, buff, 10000)) != 0)
-	{
-		buff[ret] = 0;
-		str = ft_strmjoinfree(str, buff, len, ret);
-		len = ft_strlen(str);
-	}
-	do_hash(args, infos, str, NULL);
-}
-
 int				 parse_args(t_args *args, t_infos *infos, char *str, int i)
 {
 	while (str[i] && (str[i] != ' ' && str[i] != '\t'))
@@ -137,7 +117,7 @@ int				 parse_args(t_args *args, t_infos *infos, char *str, int i)
 		if (str[i] == 'p')
 		{
 			args->arg_p = 1;
-			get_prompt(args, infos);
+			treat_file(args, infos, NULL, 0);
 		}
 		else if (str[i] == 'q')
 			args->arg_q = 1;
@@ -220,7 +200,7 @@ int			get_flags_args(t_args *args, t_infos *infos, char **str, int argc)
 		disp_usage(args);
 	if (args->arg_r == 1 && args->arg_nf == 0)
 	{
-		get_prompt(args, infos);
+		treat_file(args, infos, NULL, 0);
 	}
 	return (end);
 }
