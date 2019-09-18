@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/01 16:52:42 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/18 00:59:35 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/18 12:31:58 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,21 @@ uint32_t	add_elem(char *result, uint32_t result_index, uint8_t base)
 	return (result_index);
 }
 
+int		padding(char *str, int len)
+{
+	int i;
+	int count;
+
+	i = 1;
+	count = 0;
+	while (str[len - i] == '=')
+	{
+		count++;
+		i++;
+	}
+	return (count);
+}
+
 void	base_decrypt(t_args *args, t_infos *infos, char *str, char *file)
 {
 	(void)args;
@@ -65,8 +80,9 @@ void	base_decrypt(t_args *args, t_infos *infos, char *str, char *file)
 	
 	index_input = 0;
 	result_index = 0;
-	 
-	tot_len = ((infos->len - (infos->len / 65)) / 4) * 3;
+	tot_len = infos->len - padding(str, infos->len);
+	tot_len -= tot_len / 64;
+	tot_len = (tot_len * 3) / 4;
 	ft_printf("%u\n", tot_len);
 }
 
