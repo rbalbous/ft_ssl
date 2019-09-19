@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/17 14:56:20 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/17 23:49:01 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/09/20 00:09:43 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,9 @@ struct		s_base
 	uint8_t h1;
 	uint8_t h2;
 	uint8_t h3;
+	uint8_t r0;
+	uint8_t r1;
+	uint8_t r2;
 };
 
 void			parser(int argc, char **argv, t_args *args, t_infos *infos);
