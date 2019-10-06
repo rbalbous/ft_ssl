@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/17 14:56:20 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/20 00:09:43 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/10/06 19:09:35 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 # define CMD_LINE {"", "md5", "sha256", "base64"}
 
 
-# define USAGE "[md5;sha256] [-pqr] [-s string] [files ...]\n"
+# define USAGE "[md5;sha256;base64] [-pqr] [-s string] [files ...]\n"
 
 typedef struct s_args		t_args;
 typedef struct s_infos		t_infos;
@@ -53,7 +53,6 @@ struct s_infos
 	t_int32 error;
 	t_uint32 len;
 };
-
 
 struct		s_hash_md5
 {

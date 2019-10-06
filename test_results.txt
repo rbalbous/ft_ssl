@@ -1,6 +1,9 @@
 Test FAIL : 
 Test FAIL : X
 
+Test FAIL II : -r -s ok makefile -s ok
+Test FAIL II : X
+
 Test VALID : 
 Test VALID : V
 
@@ -19,7 +22,7 @@ Test 4 : V
 Test 5 : -q -r -s ok makefile
 Test 5 : V
 
-Test PROMPT : -p | echo "ok" | 
+Test PROMPT : -p | ok
 Test PROMPT : V
 
 Test 6 : -r -s ok
@@ -31,9 +34,12 @@ Test 7 : V
 Test 8 : -r -s ok -q
 Test 8 : V
 
-Test FAIL II : -r -s ok makefile -s ok
-Test FAIL II : X
-
 Test 9 : ok
 Test 9 : V
+
+Test 1 base64 : -d | b2sK
+Test 1 base64 : V
+
+Test >64 base64 : -d | TkFNRSA9IGZ0X3NzbAoKQ0MgPSBnY2MKRkxBR1MgPSAtV2FsbCAtV2V4dHJhIC1XZXJyb3IgLU9mYXN0CgpJTkNMVURFUyA9IGluY2x1ZGVzCgpPQkpfUEFUSCA9IG9iagoKU1JDUyA9CW1haW4uYyBcCgkJcGFyc2VyLmMgXAoJCWRpc3BsYXkuYyBcCgkJ
+Test >64 base64 : X
 

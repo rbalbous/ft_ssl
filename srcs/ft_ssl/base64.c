@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/01 16:52:42 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/09/20 01:37:01 by rbalbous         ###   ########.fr       */
+/*   Updated: 2019/10/06 21:26:15 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,26 +41,30 @@ uint8_t		get_base_index(char i)
 	uint8_t	index;
 
 	index = 0;
-	while (g_base_64[index] != i)
+	while (index < 64 && g_base_64[index] != i)
 	{
 		index++;
 	}
+	if (index == 64)
+		index = 0;
 	return (index);
 }
 
 void	init_decrypt_base(t_base *base, char *str, uint32_t i)
 {
+	if (str[i] == '\n')
+		i++;
 	if (!(str[i]))
-		exit(1);
+		exit(ft_dprintf(2, "decrypt error %d", i));
 	base->h0 = get_base_index(str[i]);
 	if (!(str[i + 1]))
-		exit(1);
+		exit(ft_dprintf(2, "decrypt error %d", i + 1));
 	base->h1 = get_base_index(str[i + 1]);
 	if (!(str[i + 2]))
-		exit(1);
+		exit(ft_dprintf(2, "decrypt error %d", i + 2));
 	base->h2 = get_base_index(str[i + 2]);
 	if (!(str[i + 3]))
-		exit(1);
+		exit(ft_dprintf(2, "decrypt error %d", i + 3));
 	base->h3 = get_base_index(str[i + 3]);
 	base->r0 = (base->h0 << 2);
 	base->r0 = base->r0 ^ (base->h1 >> 4);
@@ -86,21 +90,48 @@ uint32_t	add_elem(char *result, uint32_t result_index, uint8_t base)
 	return (result_index);
 }
 
-int		padding(char *str, int len)
+uint32_t	count_letters(char *str)
 {
-	int i;
-	int count;
+	uint32_t i;
+	uint32_t count;
 
-	i = 1;
+	i = 0;
 	count = 0;
-	while (!(str[len - i] >= 'A' &&  str[len - i] <= 'Z') && !(str[len - i] >= 'a' && str[len - i] <= 'z') && !(str[len - i] >= '0' && str[len - i] <= '9') && str[len - i] != '+' && str[len - i] != '/')
+	while (str [i])
 	{
-		count++;
+		if ((str[i] >= 'A' &&  str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '+' || str[i] == '/' || str[i] == '=')
+		{
+			count++;
+		}
 		i++;
 	}
 	return (count);
 }
-  
+
+char	*new_str(t_infos *infos, char *str)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+
+	i = 0;
+	j = 0;
+	if (!(tmp = (char*)malloc(sizeof(tmp) * (infos->len + 1))))
+		exit(ft_dprintf(2, "malloc error\n"));
+	while (str[i])
+	{
+		if ((str[i] >= 'A' &&  str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '+' || str[i] == '/' || str[i] == '=')
+		{
+			tmp[j] = str[i];
+			if (str[i] == '=')
+				infos->len--;
+			j++;
+		}
+		i++;
+	}
+	return (tmp);
+}
+
 void	base_decrypt(t_args *args, t_infos *infos, char *str, char *file)
 {
 	(void)args;
@@ -111,20 +142,18 @@ void	base_decrypt(t_args *args, t_infos *infos, char *str, char *file)
 	char		*result;
 	uint32_t	tot_len;
 	t_base		base;
-	uint32_t	sub_padding;
-	
 
 	index_input = 0;
 	result_index = 0;
-	sub_padding = padding(str, infos->len);
-	infos->len -= sub_padding;
-	str[infos->len] = 0;
+	infos->len = count_letters(str);
+	if (infos->len % 4 != 0)
+		return ;
+	str = new_str(infos, str);
 	tot_len = infos->len;
-	tot_len -= tot_len / 64;
 	tot_len = (tot_len * 3) / 4;
 	if (!(result = (char*)malloc(sizeof(result) * (tot_len + 1))))
 		exit(ft_dprintf(2, "malloc error\n"));
-	while (str[index_input] && index_input < infos->len - sub_padding)
+	while (str[index_input] && index_input < infos->len)
 	{
 		init_decrypt_base(&base, str, index_input);
 		result[result_index++] = base.r0;
@@ -196,46 +225,47 @@ int		get_file_base(t_args *args, t_infos *infos, char **str, int index)
 
 int		parse_base_flags(t_args *args, t_infos *infos, char **str, int argc)
 {
-	(void)str;
-	(void)infos;
-	(void)args;
-	int32_t	index;
+	int32_t		index;
 	uint32_t	i;
 
 	index = 2;
-	i = 0;
 	while (index < argc)
 	{
 		i = 0;
-		while (str[index][i] && str[index][i] != '-')
-			i++;
-		if (!(str[index][i]))
-		{
-			treat_file(args, infos, NULL, 0);
-			return (1);
-		}
-		while (str[index][i] && str[index][i] != '-')
-			i++;
+		if (str[index][i] != '-' || !str[index][++i])
+			exit(ft_dprintf(2, "invalid argument %s\n", str[index]));
 		while (str[index][i])
 		{
 			if (str[index][i] == 'i')
 			{
-				return (get_file_base(args, infos, str, index));
+				get_file_base(args, infos, str, index);
+				if (index + 2 >= argc)
+					return (1);
+				else
+				{
+					index += 2;
+					i = 0;
+					if (str[index][i] != '-' || !str[index][++i])
+						exit(ft_dprintf(2, "invalid argument %s\n", str[index]));
+					continue ;
+				}
 			}
-			if (str[index][i] == 'o')
+			else if (str[index][i] == 'o')
 			{
 				args->arg_o = 1;
 			}
-			if (str[index][i] == 'e')
+			else if (str[index][i] == 'e')
 			{
 				args->arg_e = 1;
 				args->arg_d = 0;
 			}
-			if (str[index][i] == 'd')
+			else if (str[index][i] == 'd')
 			{
 				args->arg_e = 0;
 				args->arg_d = 1;
 			}
+			else
+				exit(ft_dprintf(2, "unknown option %s\n", str[index]));
 			i++;
 		}
 		index++;
