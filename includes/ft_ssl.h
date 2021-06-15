@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/17 14:56:20 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/10/06 19:09:35 by rbalbous         ###   ########.fr       */
+/*   Updated: 2020/10/10 15:22:14 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,4 +118,11 @@ int				parse_md(t_args *args, t_infos *infos, char **str, int argc);
 int				parse_base64(t_args *args, t_infos *infos, char **str, int argc);
 void			do_hash(t_args *args, t_infos *infos, char *str, char *file);
 void			base64(t_args *args, t_infos *infos, char *str, char *file);
+void			update_hash_md5_pre(t_hash *hash);
+void			update_hash_md5_post(t_hash *hash);
+void			init_hash_md5(t_hash *hash);
+uint32_t		rotate_left(uint32_t x, uint32_t c);
+void			md5_ops(int i, uint32_t *fghi, uint32_t *g, t_hash *hash);
+void			print_args(t_args *args, char *str, char *file);
+void			print_hash(t_hash hash, t_args *args, char *str, char *file);
 #endif

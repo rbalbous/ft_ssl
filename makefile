@@ -11,6 +11,8 @@ SRCS =	main.c \
 		parser.c \
 		display.c \
 		md5.c \
+		algo_md5.c \
+		print_md5.c \
 		sha256.c \
 		parse_md.c \
 		base64.c

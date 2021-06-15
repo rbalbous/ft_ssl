@@ -6,13 +6,13 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/12 20:12:07 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/10/06 17:39:01 by rbalbous         ###   ########.fr       */
+/*   Updated: 2020/10/10 15:59:30 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
 
-uint32_t g_r[64] =
+uint32_t	g_r[64] =
 {
 	7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7,
 	12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5,
@@ -21,7 +21,7 @@ uint32_t g_r[64] =
 	10, 15, 21
 };
 
-uint32_t g_x[64] =
+uint32_t	g_x[64] =
 {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 	0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
@@ -41,49 +41,7 @@ uint32_t g_x[64] =
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-void		init_hash_md5(t_hash *hash)
-{
-	hash->a = 0x67452301;
-	hash->b = 0xefcdab89;
-	hash->c = 0x98badcfe;
-	hash->d = 0x10325476;
-	hash->aa = hash->a;
-	hash->bb = hash->b;
-	hash->cc = hash->c;
-	hash->dd = hash->d;
-}
-
-uint32_t	rotate_left(uint32_t x, uint32_t c)
-{
-	x = (((x) << (c)) | ((x) >> (32 - (c))));
-	return (x);
-}
-
-void			md5_operations(int i, uint32_t *fghi, uint32_t *g, t_hash *hash)
-{
-	if (i < 16)
-	{
-		*fghi = (hash->bb & hash->cc) | ((~hash->bb) & hash->dd);
-		*g = i;
-	}
-	else if (i < 32)
-	{
-		*fghi = (hash->dd & hash->bb) | ((hash->cc) & (~hash->dd));
-		*g = (5 * i + 1) % 16;
-	}
-	else if (i < 48)
-	{
-		*fghi = hash->bb ^ hash->cc ^ hash->dd;
-		*g = (3 * i + 5) % 16;
-	}
-	else if (i < 64)
-	{
-		*fghi = hash->cc ^ (hash->bb | (~hash->dd));
-		*g = (7 * i) % 16;
-	}
-}
-
-void			md5_encrypt(t_hash *hash, uint32_t *w)
+void		md5_encrypt(t_hash *hash, uint32_t *w)
 {
 	uint32_t fghi;
 	uint32_t g;
@@ -96,43 +54,39 @@ void			md5_encrypt(t_hash *hash, uint32_t *w)
 	fghi = 0;
 	while (i < 64)
 	{
-		md5_operations(i, &fghi, &g, hash);
+		md5_ops(i, &fghi, &g, hash);
 		tmp = hash->dd;
 		hash->dd = hash->cc;
 		hash->cc = hash->bb;
-        // printf("rotateLeft(%x + %x + %x + %x, %d)\n", hash->aa, fghi, g_x[i], w[g], g_r[i]);
 		hash->bb = hash->bb + rotate_left(hash->aa + fghi + g_x[i] + w[g], g_r[i]);
 		hash->aa = tmp;
 		i++;
 	}
 }
 
-void		update_hash_md5_pre(t_hash *hash)
+void		md5_loop(int offset, int new_len, unsigned char *msg, t_hash *hash)
 {
-	hash->aa = hash->a;
-	hash->bb = hash->b;
-	hash->cc = hash->c;
-	hash->dd = hash->d;
-}
+	uint32_t		*w;
 
-void		update_hash_md5_post(t_hash *hash)
-{
-	hash->a += hash->aa;
-	hash->b += hash->bb;
-	hash->c += hash->cc;
-	hash->d += hash->dd;
+	w = 0;
+	while (offset < new_len)
+	{
+		update_hash_md5_pre(hash);
+		w = (uint32_t *)(msg + offset);
+		md5_encrypt(hash, w);
+		offset += 64;
+		update_hash_md5_post(hash);
+	}
 }
 
 void		algo_md5(char *str, uint32_t len, t_hash *hash)
 {
 	int				new_len;
 	unsigned char	*msg;
-	uint32_t	bit_len;
-	int		offset;
-	uint32_t *w;
+	uint32_t		bit_len;
+	int				offset;
 
 	msg = NULL;
-	w = 0;
 	bit_len = len * 8;
 	new_len = bit_len + 1;
 	offset = 0;
@@ -143,14 +97,7 @@ void		algo_md5(char *str, uint32_t len, t_hash *hash)
 	ft_memcpy(msg, str, len);
 	msg[len] = 128;
  	ft_memcpy(msg + new_len, &bit_len, 4);
-	while (offset < new_len)
-	{
-		update_hash_md5_pre(hash);
-		w = (uint32_t *)(msg + offset);
-		md5_encrypt(hash, w);
-		offset += 64;
-		update_hash_md5_post(hash);
-	}
+	md5_loop(offset, new_len, msg, hash);
 	free(msg);
 }
 
@@ -158,7 +105,6 @@ void		md5(t_args *args, t_infos *infos, char *str, char *file)
 {
 	uint32_t	len;
 	t_hash		hash;
-	unsigned char *p;
 
 	hash = (t_hash){0, 0, 0, 0, 0, 0, 0, 0};
 	if (infos->len == 0 && str != NULL)
@@ -167,31 +113,6 @@ void		md5(t_args *args, t_infos *infos, char *str, char *file)
 		len = infos->len;
 	init_hash_md5(&hash);
 	algo_md5(str, len, &hash);
-	if (args->arg_r)
-		args->arg_r = 2;
-	if (!args->arg_s && !args->arg_p && !args->arg_q && !args->arg_r && file != NULL)
-		ft_printf("MD5 (%s) = ", file);
-	if (args->arg_p && !args->arg_q && !args->arg_r)
-	{
-		args->arg_p = 0;
-		ft_printf("%s", str);
-	}
-	if (args->arg_s && !args->arg_q && !args->arg_r) 
-	{	
-		ft_printf("MD5 (\"%s\") = ", str);
-		args->arg_s = 0;
-	}
-	p=(unsigned char *)&hash.a;
-	ft_printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3]);
-    p=(unsigned char *)&hash.b;
-	ft_printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3]);
-    p=(unsigned char *)&hash.c;
-	ft_printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3]);
-    p=(unsigned char *)&hash.d;
-    ft_printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3]);
-	if (args->arg_r && args->arg_s && !args->arg_q)
-		ft_printf(" \"%s\"", str);
-	if (args->arg_r && file != NULL && !args->arg_q)
-		ft_printf(" %s", file);
-	ft_printf("\n");
+	print_args(args, str, file);
+	print_hash(hash, args, str, file);
 }

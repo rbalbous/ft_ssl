@@ -6,7 +6,7 @@
 /*   By: rbalbous <rbalbous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/01 16:52:42 by rbalbous          #+#    #+#             */
-/*   Updated: 2019/10/06 21:26:15 by rbalbous         ###   ########.fr       */
+/*   Updated: 2020/10/10 15:05:00 by rbalbous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,10 @@ uint32_t	count_letters(char *str)
 	count = 0;
 	while (str [i])
 	{
-		if ((str[i] >= 'A' &&  str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '+' || str[i] == '/' || str[i] == '=')
+		if ((str[i] >= 'A' &&  str[i] <= 'Z')
+		|| (str[i] >= 'a' && str[i] <= 'z')
+		|| (str[i] >= '0' && str[i] <= '9') 
+		|| str[i] == '+' || str[i] == '/' || str[i] == '=')
 		{
 			count++;
 		}
@@ -120,7 +123,9 @@ char	*new_str(t_infos *infos, char *str)
 		exit(ft_dprintf(2, "malloc error\n"));
 	while (str[i])
 	{
-		if ((str[i] >= 'A' &&  str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '+' || str[i] == '/' || str[i] == '=')
+		if ((str[i] >= 'A' &&  str[i] <= 'Z') 
+		|| (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9')
+		|| str[i] == '+' || str[i] == '/' || str[i] == '=')
 		{
 			tmp[j] = str[i];
 			if (str[i] == '=')
@@ -132,11 +137,8 @@ char	*new_str(t_infos *infos, char *str)
 	return (tmp);
 }
 
-void	base_decrypt(t_args *args, t_infos *infos, char *str, char *file)
+void	base_decrypt(t_infos *infos, char *str)
 {
-	(void)args;
-	(void)file;
-	(void)str;
 	uint32_t	index_input;
 	uint32_t	result_index;
 	char		*result;
@@ -149,8 +151,7 @@ void	base_decrypt(t_args *args, t_infos *infos, char *str, char *file)
 	if (infos->len % 4 != 0)
 		return ;
 	str = new_str(infos, str);
-	tot_len = infos->len;
-	tot_len = (tot_len * 3) / 4;
+	tot_len = (infos->len * 3) / 4;
 	if (!(result = (char*)malloc(sizeof(result) * (tot_len + 1))))
 		exit(ft_dprintf(2, "malloc error\n"));
 	while (str[index_input] && index_input < infos->len)
@@ -167,7 +168,6 @@ void	base_decrypt(t_args *args, t_infos *infos, char *str, char *file)
 
 void	base64(t_args *args, t_infos *infos, char *str, char *file)
 {
-	(void)args;
 	(void)file;
 	uint32_t	index_input;
 	uint32_t	result_index;
@@ -176,8 +176,10 @@ void	base64(t_args *args, t_infos *infos, char *str, char *file)
 	uint32_t	tot_len;
 	uint32_t	add_padding;
 
+	if (!str)
+		return;
 	if (args->arg_d == 1)
-		return (base_decrypt(args, infos, str, file));
+		return (base_decrypt(infos, str));
 	index_input = 0;
 	result_index = 0;
 	add_padding = infos->len % 3;
@@ -289,19 +291,3 @@ int		parse_base64(t_args *args, t_infos *infos, char **str, int argc)
 	}
 	return (0);
 }
-
-// h0 0010 1110
-// h1 0001 0111
-// h2 0000 0010
-// h3 0001 1111
-
-// r0 10 111001
-// r1 0111 0000
-// r2 1001 1111
-
-// r0 = (h0 << 2);
-// r0 = r0 & (h1 >> 4);
-// r1 = (h1 << 4);
-// r1 = r1 & (h2 >> 2);
-// r2 = h2 << 6;
-// r2 = r2 & h3;
